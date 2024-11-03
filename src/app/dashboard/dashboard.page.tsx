@@ -10,11 +10,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AudioLines, Loader, Trash } from "lucide-react";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useRef, useState } from "react";
 
 export const Dashboard = () => {
   const [audioFile, setAudioFile] = useState<File | null>(null);
-  const [processing, setProcessing] = useState(false)
+  const [processing, setProcessing] = useState(false);
+  const inputElement = useRef<HTMLInputElement>(null)
 
   const onChangeAudio = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -22,9 +23,15 @@ export const Dashboard = () => {
     }
   };
 
+  const resetForm = () => {
+    setAudioFile(null)
+    if (inputElement.current) {
+      inputElement.current.value = ''
+    }
+  }
   const onProcess = () => {
     if (audioFile) {
-      setProcessing(true)
+      setProcessing(true);
       console.log(URL.createObjectURL(audioFile));
     }
   };
@@ -40,9 +47,15 @@ export const Dashboard = () => {
             <form>
               <Label htmlFor="audio">Audio file</Label>
               <div className="flex gap-2">
-                <Input id="audio" type="file" onChange={onChangeAudio} />
+                <Input id="audio" type="file" onChange={onChangeAudio} ref={inputElement}/>
                 {audioFile && (
-                  <Button variant="outline" type="button" className="hover:text-red-500">
+                  <Button
+                    variant="outline"
+                    type="button"
+                    className="hover:text-red-500"
+                    disabled={processing}
+                    onClick={resetForm}
+                  >
                     <Trash />
                   </Button>
                 )}
@@ -51,16 +64,8 @@ export const Dashboard = () => {
           </CardContent>
           <CardFooter className="flex justify-between">
             <Button variant="outline" onClick={onProcess} disabled={processing}>
-              {
-                processing && (
-                  <Loader className="animate-spin"/>
-                )
-              }
-              {
-                !processing && (
-                  <AudioLines />
-                )
-              }
+              {processing && <Loader className="animate-spin" />}
+              {!processing && <AudioLines />}
               Process
             </Button>
           </CardFooter>
