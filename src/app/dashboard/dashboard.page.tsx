@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { TranscribeAIService } from "@/services/transcribe-ai.service";
 import { AudioLines, Loader, Trash } from "lucide-react";
 import { ChangeEvent, useRef, useState } from "react";
 
@@ -29,10 +30,19 @@ export const Dashboard = () => {
       inputElement.current.value = ''
     }
   }
-  const onProcess = () => {
+  const onProcess = async () => {
     if (audioFile) {
       setProcessing(true);
-      console.log(URL.createObjectURL(audioFile));
+      try {
+        const service = new TranscribeAIService()
+        const segments = await service.transcribe(audioFile)
+        localStorage.setItem('transcribe-ai', JSON.stringify(segments))
+        console.log(segments)
+      } catch (exception) {
+        console.error(exception)
+      } finally {
+        setProcessing(false)
+      }
     }
   };
   return (
