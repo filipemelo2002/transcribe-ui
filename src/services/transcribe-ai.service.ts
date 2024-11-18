@@ -17,11 +17,11 @@ export class TranscribeAIService {
   async transcribe(file: File) {
     const formBody = new FormData()
 
-    formBody.append('audio', file)
+    formBody.append('file', file)
     const response = await fetch('http://localhost:8000/transcribe', {
       method: 'POST',
       headers: {
-        'accept': 'application/json',
+        'accept': 'application/json'
       },
       body: formBody
     })
