@@ -11,59 +11,44 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SubtitleService } from "@/services/subtitle.service";
-import { Segment, TranscribeAIService } from "@/services/transcribe-ai.service";
+import { TranscribeAIService } from "@/services/transcribe-ai.service";
 import { AudioLines, Loader, Trash } from "lucide-react";
-import { ChangeEvent, useRef, useState } from "react";
+import { useDashboard } from "./dashboard.state";
 
 const subtitleService = new SubtitleService()
+const transcribeService = new TranscribeAIService()
 
 export const Dashboard = () => {
-  const [mediaFile, setMediaFile] = useState<File | null>(null);
-  const [segments, setSegments] = useState<Segment[]>(JSON.parse(localStorage.getItem('transcribe-ai') || '[]'));
-  const [processing, setProcessing] = useState(false);
-  const inputElement = useRef<HTMLInputElement>(null)
-
-  const onChangeAudio = (event: ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      setMediaFile(event.target.files[0]);
-    }
-  };
-
-  const resetForm = () => {
-    setMediaFile(null)
-    if (inputElement.current) {
-      inputElement.current.value = ''
-    }
-  }
-  const onProcess = async () => {
-    if (mediaFile) {
-      setProcessing(true);
-      try {
-        const service = new TranscribeAIService()
-        const segments = await service.transcribe(mediaFile)
-        localStorage.setItem('transcribe-ai', JSON.stringify(segments))
-        setSegments(segments)
-        console.log(segments)
-      } catch (exception) {
-        console.error(exception)
-      } finally {
-        setProcessing(false)
-      }
-    }
-  };
+  const {
+    file,
+    caption,
+    showPreview,
+    processing,
+    onProcessFile,
+    resetForm,
+    inputElement,
+    onChangeFile
+  } = useDashboard({
+    transcribeService,
+    subtitleService
+  })
   return (
     <div className="flex w-full min-h-screen bg-background text-foreground font-sans items-center justify-center gap-3 flex-wrap-reverse">
       {
-        (mediaFile && !processing) && (
+        (showPreview) && (
           <div className="aspect-video max-w-[474px] w-11/12">
             <video id="video" controls preload="metadata" className="w-full h-full">
-              <source src={URL.createObjectURL(mediaFile)} type="video/mp4" />
-              <track
-                kind="subtitles"
-                label="English"
-                srcLang="en"
-                default
-                src={URL.createObjectURL(subtitleService.processVttFile(segments))} />
+              <source src={URL.createObjectURL(file as File)} type="video/mp4" />
+              {
+                caption && (
+                  <track
+                    kind="subtitles"
+                    label="English"
+                    srcLang="en"
+                    default
+                    src={URL.createObjectURL(caption)} />
+                )
+              }
             </video>
           </div>
         )
@@ -82,8 +67,8 @@ export const Dashboard = () => {
             <form>
               <Label htmlFor="audio">Video file</Label>
               <div className="flex gap-2">
-                <Input id="audio" type="file" onChange={onChangeAudio} ref={inputElement}/>
-                {mediaFile && (
+                <Input id="audio" type="file" onChange={onChangeFile} ref={inputElement}/>
+                {file && (
                   <Button
                     variant="outline"
                     type="button"
@@ -98,7 +83,7 @@ export const Dashboard = () => {
             </form>
           </CardContent>
           <CardFooter className="flex justify-between">
-            <Button variant="outline" onClick={onProcess} disabled={processing}>
+            <Button variant="outline" onClick={onProcessFile} disabled={processing}>
               {processing && <Loader className="animate-spin" />}
               {!processing && <AudioLines />}
               Process
