@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import { SubtitleService } from "@/services/subtitle.service";
 import { Segment, TranscribeAIService } from "@/services/transcribe-ai.service";
 import { AudioLines, Loader, Trash } from "lucide-react";
@@ -51,22 +52,27 @@ export const Dashboard = () => {
     }
   };
   return (
-    <div className="flex w-full min-h-screen bg-background text-foreground font-sans items-center justify-center">
+    <div className="flex w-full min-h-screen bg-background text-foreground font-sans items-center justify-center gap-3 flex-wrap-reverse">
       {
-        mediaFile && (
-          <video id="video" controls preload="metadata">
-            <source src={URL.createObjectURL(mediaFile)} type="video/mp4" />
-            <track
-              kind="subtitles"
-              label="English"
-              srcLang="en"
-              default
-              src={URL.createObjectURL(subtitleService.processVttFile(segments))} />
-          </video>
+        (mediaFile && !processing) && (
+          <div className="aspect-video max-w-[474px] w-11/12">
+            <video id="video" controls preload="metadata" className="w-full h-full">
+              <source src={URL.createObjectURL(mediaFile)} type="video/mp4" />
+              <track
+                kind="subtitles"
+                label="English"
+                srcLang="en"
+                default
+                src={URL.createObjectURL(subtitleService.processVttFile(segments))} />
+            </video>
+          </div>
+        )
+      } 
+      {
+        processing && (
+          <Skeleton className="w-[474px] h-[266px]" />
         )
       }
-      
-      <div className="mt-auto mb-auto ml-auto mr-auto">
         <Card className="max-w-[350px]">
           <CardHeader>
             <CardTitle>Transcribe.ai</CardTitle>
@@ -99,7 +105,6 @@ export const Dashboard = () => {
             </Button>
           </CardFooter>
         </Card>
-      </div>
     </div>
   );
 };
