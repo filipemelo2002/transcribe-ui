@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import {
-  Card,
   CardContent,
   CardDescription,
   CardFooter,
@@ -34,7 +33,7 @@ export const Dashboard = () => {
     subtitleService,
   });
 
-  const containerMaxWidth = (showPreview || processing) ? 'max-w-[1140px]' : 'max-w-[350px]';
+  const containerMaxWidth = (showPreview || processing) ? 'max-w-[1140px]' : 'max-w-[450px]';
 
   return (
     <div className="flex flex-col w-full min-h-screen bg-background text-foreground font-sans items-center justify-center">
@@ -65,7 +64,7 @@ export const Dashboard = () => {
             </div>
           )}
           {processing && <Skeleton className=" aspect-video w-full" />}
-          <Card className="w-full self-stretch">
+          <div className="w-full self-stretch">
             <CardHeader>
               <CardTitle>Transcribe.ai</CardTitle>
               <CardDescription>Transcribe videos in one-click.</CardDescription>
@@ -105,7 +104,7 @@ export const Dashboard = () => {
                 Process
               </Button>
             </CardFooter>
-          </Card>
+          </div>
         </div>
         {
           caption && (
