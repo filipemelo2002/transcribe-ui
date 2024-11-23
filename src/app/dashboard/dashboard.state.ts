@@ -22,6 +22,7 @@ export function useDashboard({
 
   const resetForm = () => {
     setFile(null)
+    setCaption(null)
     if (inputElement.current) {
       inputElement.current.value = ''
     }
