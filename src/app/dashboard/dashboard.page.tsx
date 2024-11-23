@@ -30,7 +30,7 @@ export const Dashboard = () => {
   return (
     <div className="flex flex-col w-full min-h-screen bg-background text-foreground font-sans items-center justify-center">
       <div className={`flex flex-col w-full ${containerMaxWidth} gap-3 p-3`}>
-        <div className="flex gap-3 lg:flex-nowrap md:flex-wrap-reverse items-center justify-center w-full">
+        <div className="flex gap-3 lg:flex-nowrap md:flex-wrap-reverse flex-wrap-reverse items-center justify-center w-full">
           {showPreview && (
             <MediaPreview file={file as File} caption={caption} />
           )}
