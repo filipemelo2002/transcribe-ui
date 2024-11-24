@@ -1,4 +1,4 @@
-import { Film, Pencil } from "lucide-react";
+import { Check, Film, Pencil } from "lucide-react";
 import { Button } from "../ui/button";
 import {
   CardContent,
@@ -9,10 +9,20 @@ import {
 import { Checkbox } from "../ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { SubtitleSettings } from "@/services/subtitle.service";
+import { useState } from "react";
+import { Input } from "../ui/input";
 
-const SpeakersTable = () => {
+interface SpeakersTableProps {
+  items: {id: string, name?: string}[]
+  onChangeSpeakerName: (id: string, name: string) => void
+}
+const SpeakersTable = ({items, onChangeSpeakerName}: SpeakersTableProps) => {
+  const [editting, setEditting] = useState(false)
+
+  const toggleEditting = () => setEditting(!editting)
+
   return (
-    <Table className="lg:max-w-[300px] text-xs ml-4">
+    <Table className="lg:max-w-[450px] text-xs ml-4">
       <TableHeader>
         <TableRow>
           <TableHead>ID</TableHead>
@@ -20,12 +30,33 @@ const SpeakersTable = () => {
         </TableRow>
       </TableHeader>
       <TableBody>
-        <TableRow>
-          <TableCell className="font-bold">SPEAKER_00</TableCell>
-          <TableCell className="flex justify-between text-sm items-center">
-            <span>Filipe</span><Button variant="ghost"><Pencil /></Button>
-          </TableCell>
-        </TableRow>
+          {
+            items.map(item => (
+              <TableRow key={item.id}>
+                <TableCell className="font-bold">{item.id}</TableCell>
+                <TableCell className="flex justify-between text-sm items-center gap-1">
+                  {
+                    !editting && (
+                      <>
+                        <span className="italic font-medium leading-none peer-disabled:cursor-not-allowed opacity-70">{item.name || 'blank'}</span><Button variant="ghost" onClick={toggleEditting}><Pencil /></Button>
+                      </>
+                    )
+                  }
+
+                  {
+                    editting && (
+                      <>
+                        <Input type="text" value={item.name} onChange={(event) => {
+                          onChangeSpeakerName(item.id, event.target.value)
+                        }}/>
+                        <Button variant="ghost" onClick={toggleEditting}><Check /></Button>
+                      </>
+                    )
+                  }
+                </TableCell>
+              </TableRow>
+            ))
+          }
       </TableBody>
     </Table>
   )
@@ -97,7 +128,21 @@ export const CaptionsForm = ({subtitleSettings, onChangeSubtitleSettings}: Capti
           </div>
         </div>
         <div className="mt-3">
-          <SpeakersTable />
+          <SpeakersTable 
+            items={Object.keys(subtitleSettings.speakerIdMap).map(key => ({
+              id: key,
+              name: subtitleSettings.speakerIdMap[key]
+            }))}
+            onChangeSpeakerName={(id: string, name: string) => {
+              onChangeSubtitleSettings({
+                ...subtitleSettings,
+                speakerIdMap: {
+                  ...subtitleSettings.speakerIdMap,
+                  [id]: name
+                }
+              })
+            }}
+          />
         </div>
       </CardContent>
       <CardFooter className="flex space-x-2">
