@@ -8,6 +8,7 @@ import {
 } from "../ui/card";
 import { Checkbox } from "../ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
+import { SubtitleSettings } from "@/services/subtitle.service";
 
 const SpeakersTable = () => {
   return (
@@ -30,7 +31,12 @@ const SpeakersTable = () => {
   )
 }
 
-export const CaptionsForm = () => {
+export interface CaptionsFormInterface {
+  subtitleSettings: SubtitleSettings
+  onChangeSubtitleSettings: (val: SubtitleSettings) => void 
+}
+
+export const CaptionsForm = ({subtitleSettings, onChangeSubtitleSettings}: CaptionsFormInterface) => {
   return (
     <div>
       <CardHeader>
@@ -38,7 +44,19 @@ export const CaptionsForm = () => {
       </CardHeader>
       <CardContent>
         <div className="items-top flex space-x-2">
-          <Checkbox id="wordedCaption" />
+          <Checkbox id="wordedCaption" defaultChecked={subtitleSettings.wordedCaptions} onCheckedChange={(value) => { 
+            if (typeof value === 'boolean') {
+              onChangeSubtitleSettings({
+                ...subtitleSettings,
+                wordedCaptions: value
+              })
+              return
+            }
+            onChangeSubtitleSettings({
+              ...subtitleSettings,
+              wordedCaptions: false
+            })
+          }}/>
           <div className="grid gap-1.5 leading-none">
             <label
               htmlFor="wordedCaption"
@@ -52,7 +70,19 @@ export const CaptionsForm = () => {
           </div>
         </div>
         <div className="items-top mt-4 flex space-x-2">
-          <Checkbox id="showSpeaker" />
+          <Checkbox id="showSpeaker" defaultChecked={subtitleSettings.speakerInCaptions} onCheckedChange={(value) => { 
+            if (typeof value === 'boolean') {
+              onChangeSubtitleSettings({
+                ...subtitleSettings,
+                speakerInCaptions: value
+              })
+              return
+            }
+            onChangeSubtitleSettings({
+              ...subtitleSettings,
+              speakerInCaptions: false
+            })
+          }}/>
           <div className="grid gap-1.5 leading-none">
             <label
               htmlFor="showSpeaker"

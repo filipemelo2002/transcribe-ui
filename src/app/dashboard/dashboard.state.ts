@@ -1,7 +1,12 @@
-import { SubtitleService } from "@/services/subtitle.service";
-import { TranscribeAIService } from "@/services/transcribe-ai.service";
+import { SubtitleService, SubtitleSettings } from "@/services/subtitle.service";
+import { Segment, TranscribeAIService } from "@/services/transcribe-ai.service";
 import { ChangeEvent, useRef, useState } from "react";
 
+const SUBTITLE_SETTINGS_INITIAL_STATE: SubtitleSettings = {
+  speakerIdMap: {},
+  speakerInCaptions: false,
+  wordedCaptions: true
+}
 export function useDashboard({
   transcribeService,
   subtitleService
@@ -11,7 +16,9 @@ export function useDashboard({
 }) {
   const [file, setFile] = useState<File | null>(null);
   const [caption, setCaption] = useState<Blob | null>(null);
+  const [segments, setSegments] = useState<Segment[]>([])
   const [processing, setProcessing] = useState(false);
+  const [subtitleSettings, setSubtitleSettings] = useState<SubtitleSettings>(SUBTITLE_SETTINGS_INITIAL_STATE)
   const inputElement = useRef<HTMLInputElement>(null)
 
   const onChangeFile = (event: ChangeEvent<HTMLInputElement>) => {
@@ -23,6 +30,7 @@ export function useDashboard({
   const resetForm = () => {
     setFile(null)
     setCaption(null)
+    setSubtitleSettings(SUBTITLE_SETTINGS_INITIAL_STATE)
     if (inputElement.current) {
       inputElement.current.value = ''
     }
@@ -31,8 +39,13 @@ export function useDashboard({
     if (file) {
       setProcessing(true);
       try {
-        const segments = await transcribeService.transcribe(file)
-        setCaption(subtitleService.processVttFile(segments))
+        const response = await transcribeService.transcribe(file)
+        setSubtitleSettings({
+          ...subtitleSettings,
+          speakerIdMap: getUniqueSpeakerIds(response).reduce((obj, id) => ({...obj, [id]: ''}), {})
+        })
+        setCaption(subtitleService.processVttFile(response))
+        setSegments(response)
       } catch (exception) {
         console.error(exception)
       } finally {
@@ -40,7 +53,12 @@ export function useDashboard({
       }
     }
   };
-  
+
+  const onChangeSubtitleSettings = (settings: SubtitleSettings) => {
+    setSubtitleSettings(settings)
+    setCaption(subtitleService.processVttFile(segments, settings))
+  }
+
   return {
     file,
     onChangeFile,
@@ -49,6 +67,21 @@ export function useDashboard({
     caption,
     inputElement,
     showPreview: file && !processing,
-    resetForm
+    resetForm,
+    subtitleSettings,
+    onChangeSubtitleSettings
   }
+}
+
+
+function getUniqueSpeakerIds (segments: Segment[]) {
+  const ids = new Set<string>()
+
+  for (const segment of segments) {
+    if (ids.has(segment.speaker_id)) {
+      continue
+    }
+    ids.add(segment.speaker_id)
+  }
+  return Array.from(ids)
 }

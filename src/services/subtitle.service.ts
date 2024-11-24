@@ -1,7 +1,15 @@
 import { Segment } from "./transcribe-ai.service";
 
+
+export interface SubtitleSettings {
+  wordedCaptions: boolean
+  speakerInCaptions: boolean
+  speakerIdMap: {
+    [key: string]: string | undefined
+  }
+}
 export class SubtitleService {
-  processVttFile(segments: Segment[]) {
+  processVttFile(segments: Segment[], settings?: SubtitleSettings) {
     let body = `WEBVTT\n`;
     
     let cuesCount = 1
@@ -13,10 +21,18 @@ export class SubtitleService {
 
         const startStr = this.secondsToString(transcription.start)
         const endStr = this.secondsToString(transcription.end)
+
+        let prefix = ''
+
+        if  (settings?.speakerInCaptions) {
+          const name = settings.speakerIdMap[speakerId] || speakerId
+          prefix = `[${name}] `
+        }
+
         body += "\n\n"
         body += `${cuesCount}\n`
         body += `${startStr} --> ${endStr} align:center\n`
-        body += `<v ${speakerId}>${transcription.word.trim()}</v>`
+        body += `<v ${speakerId}>${prefix + transcription.word.trim()}</v>`
         cuesCount++
       }
     }
