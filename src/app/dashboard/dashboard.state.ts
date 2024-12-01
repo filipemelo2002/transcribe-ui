@@ -5,6 +5,7 @@ import { ChangeEvent, useRef, useState } from "react";
 const SUBTITLE_SETTINGS_INITIAL_STATE: SubtitleSettings = {
   speakerIdMap: {},
   speakerInCaptions: false,
+  multiColorCaptions: false,
   wordedCaptions: true
 }
 export function useDashboard({

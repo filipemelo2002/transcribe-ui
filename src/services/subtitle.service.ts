@@ -1,43 +1,59 @@
 import { Segment } from "./transcribe-ai.service";
 
-
 export interface SubtitleSettings {
-  wordedCaptions: boolean
-  speakerInCaptions: boolean
+  wordedCaptions: boolean;
+  speakerInCaptions: boolean;
+  multiColorCaptions: boolean;
   speakerIdMap: {
-    [key: string]: string | undefined
-  }
+    [key: string]: {
+      name?: string;
+      captionColor?: string;
+    };
+  };
 }
 export class SubtitleService {
   processVttFile(segments: Segment[], settings?: SubtitleSettings) {
     let body = `WEBVTT\n`;
-    
-    let cuesCount = 1
 
+    let cuesCount = 1;
+    body += this.addVTTStyleBlock(settings);
     for (const segment of segments) {
       const speakerId = segment.speaker_id;
-      
+
       for (const transcription of segment.transcriptions) {
+        const startStr = this.secondsToString(transcription.start);
+        const endStr = this.secondsToString(transcription.end);
 
-        const startStr = this.secondsToString(transcription.start)
-        const endStr = this.secondsToString(transcription.end)
+        let prefix = "";
 
-        let prefix = ''
-
-        if  (settings?.speakerInCaptions) {
-          const name = settings.speakerIdMap[speakerId] || speakerId
-          prefix = `[${name}] `
+        if (settings?.speakerInCaptions) {
+          const name = settings.speakerIdMap[speakerId]?.name || speakerId;
+          prefix = `[${name}] `;
         }
 
-        body += "\n\n"
-        body += `${cuesCount}\n`
-        body += `${startStr} --> ${endStr} align:center\n`
-        body += `<v ${speakerId}>${prefix + transcription.word.trim()}</v>`
-        cuesCount++
+        body += "\n\n";
+        body += `${cuesCount}\n`;
+        body += `${startStr} --> ${endStr} align:center\n`;
+        body += `<v ${speakerId}>${prefix + transcription.word.trim()}</v>`;
+        cuesCount++;
       }
     }
-    console.log(body)
+    console.log(body);
     return new Blob([body], { type: "text/plain" });
+  }
+
+  private addVTTStyleBlock(settings?: SubtitleSettings) {
+    if (!settings || !settings.multiColorCaptions) {
+      return "";
+    }
+    let styleBlock = "";
+    for (const id of Object.keys(settings.speakerIdMap)) {
+      styleBlock += "STYLE\n";
+      styleBlock += `::cue(v[voice="${id}"]) { color: ${
+        settings.speakerIdMap[id].captionColor || "#fcbe11"
+      } }\n\n`;
+    }
+    return styleBlock;
   }
 
   private secondsToString(value: number) {
