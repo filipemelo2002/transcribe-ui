@@ -17,9 +17,9 @@ interface SpeakersTableProps {
   onChangeSpeakerName: (id: string, name: string) => void
 }
 const SpeakersTable = ({items, onChangeSpeakerName}: SpeakersTableProps) => {
-  const [editting, setEditting] = useState(false)
+  const [editting, setEditting] = useState<string | null>(null)
 
-  const toggleEditting = () => setEditting(!editting)
+  const toggleEditting = (value: string) => setEditting(editting === value ? null : value)
 
   return (
     <Table className="lg:max-w-[450px] text-xs ml-4">
@@ -36,20 +36,20 @@ const SpeakersTable = ({items, onChangeSpeakerName}: SpeakersTableProps) => {
                 <TableCell className="font-bold">{item.id}</TableCell>
                 <TableCell className="flex justify-between text-sm items-center gap-1">
                   {
-                    !editting && (
+                    editting !== item.id && (
                       <>
-                        <span className="italic font-medium leading-none peer-disabled:cursor-not-allowed opacity-70">{item.name || 'blank'}</span><Button variant="ghost" onClick={toggleEditting}><Pencil /></Button>
+                        <span className="italic font-medium leading-none peer-disabled:cursor-not-allowed opacity-70">{item.name || 'blank'}</span><Button variant="ghost" onClick={() => toggleEditting(item.id)}><Pencil /></Button>
                       </>
                     )
                   }
 
                   {
-                    editting && (
+                    editting === item.id && (
                       <>
                         <Input type="text" value={item.name} onChange={(event) => {
                           onChangeSpeakerName(item.id, event.target.value)
                         }}/>
-                        <Button variant="ghost" onClick={toggleEditting}><Check /></Button>
+                        <Button variant="ghost" onClick={() => toggleEditting(item.id)}><Check /></Button>
                       </>
                     )
                   }
