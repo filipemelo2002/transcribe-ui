@@ -79,7 +79,7 @@ const SpeakersTable = ({
             <TableCell>
               <ColorPicker
                 disabled={disableColorPicker}
-                value={item.captionColor || "#fcbe11"}
+                value={item.captionColor || "#FFFFFF"}
                 onChange={(value) =>
                   onChangeSpeakerCaptionSettings({
                     ...item,
