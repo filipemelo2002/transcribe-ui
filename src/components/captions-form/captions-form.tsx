@@ -103,11 +103,15 @@ const SpeakersTable = ({
 export interface CaptionsFormInterface {
   subtitleSettings: SubtitleSettings;
   onChangeSubtitleSettings: (val: SubtitleSettings) => void;
+  onDownloadMedia: () => void 
+  disableDownloadMedia: boolean
 }
 
 export const CaptionsForm = ({
   subtitleSettings,
   onChangeSubtitleSettings,
+  onDownloadMedia,
+  disableDownloadMedia
 }: CaptionsFormInterface) => {
   return (
     <div>
@@ -227,7 +231,7 @@ export const CaptionsForm = ({
         </div>
       </CardContent>
       <CardFooter className="flex space-x-2">
-        <Button variant="outline">
+        <Button variant="outline" onClick={onDownloadMedia} disabled={disableDownloadMedia}>
           <Film />
           Download media
         </Button>

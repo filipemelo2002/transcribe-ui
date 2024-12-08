@@ -20,7 +20,9 @@ export const Dashboard = () => {
     inputElement,
     onChangeFile,
     subtitleSettings,
-    onChangeSubtitleSettings
+    onChangeSubtitleSettings,
+    onDownloadMedia,
+    disableDownloadMedia
   } = useDashboard({
     transcribeService,
     subtitleService,
@@ -46,7 +48,7 @@ export const Dashboard = () => {
             resetForm={resetForm}
           />
         </div>
-        {!!caption && <CaptionsForm subtitleSettings={subtitleSettings} onChangeSubtitleSettings={onChangeSubtitleSettings}/>}
+        {!!caption && <CaptionsForm subtitleSettings={subtitleSettings} onChangeSubtitleSettings={onChangeSubtitleSettings} onDownloadMedia={onDownloadMedia} disableDownloadMedia={disableDownloadMedia}/>}
       </div>
     </div>
   );
